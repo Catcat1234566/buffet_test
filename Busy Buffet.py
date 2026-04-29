@@ -1,18 +1,42 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt        
+import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import subprocess
+import os
 
-font_path = 'Kanit-Regular.ttf'          
-fe = fm.FontEntry(fname=font_path, name='ThaiFont')
-fm.fontManager.ttflist.insert(0, fe)
-plt.rcParams['font.family'] = fe.name   
-plt.rcParams['axes.unicode_minus'] = False
+# ติดตั้งและโหลดฟอนต์ภาษาไทยอัตโนมัติ (รองรับ Streamlit Cloud)
+@st.cache_resource
+def setup_thai_font():
+    """ติดตั้งฟอนต์ภาษาไทยสำหรับ Matplotlib"""
+    font_name = "Garuda"
+    font_path = "/usr/share/fonts/truetype/tlwg/Garuda.ttf"
+    
+    # ถ้ายังไม่มีฟอนต์ ให้ติดตั้งผ่าน apt
+    if not os.path.exists(font_path):
+        try:
+            subprocess.run(
+                ["apt-get", "install", "-y", "fonts-thai-tlwg"],
+                check=True, capture_output=True
+            )
+        except Exception:
+            pass
+    
+    # โหลดฟอนต์เข้า Matplotlib
+    if os.path.exists(font_path):
+        fm.fontManager.addfont(font_path)
+        plt.rcParams['font.family'] = font_name
+        return font_name
+    
+    # Fallback: ใช้ DejaVu (ไม่มีไทย แต่ไม่ crash)
+    plt.rcParams['font.family'] = 'DejaVu Sans'
+    return 'DejaVu Sans'
+
+_thai_font = setup_thai_font()
 
 @st.cache_data
 def load_data():
-    # ตรวจสอบชื่อไฟล์ให้ตรงกับบน GitHub
     path = "2026 Data Test1 Final - Busy Buffet Dataset.xlsx"
     xl = pd.read_excel(path, sheet_name=None)
     
@@ -31,22 +55,18 @@ def load_data():
     def to_min(t):
         if pd.isna(t): return 0
         parts = str(t).split(':')
-        try:
-            return int(parts[0]) * 60 + int(parts[1])
-        except:
-            return 0
-
+        return int(parts[0]) * 60 + int(parts[1])
+ 
     data['meal_min'] = data['meal_end'].apply(to_min) - data['meal_start'].apply(to_min)
     data['is_walkaway'] = data['meal_start'].isna() & data['queue_start'].notna()
     
     return data, day_names
-
+ 
 df, day_list = load_data()
 seated = df[df['meal_min'] > 0]
-
+ 
 # --- ตั้งค่าหน้าจอ ---
 st.set_page_config(layout="wide")
-
 st.title("Breakfast Buffet Analysis")
  
 # --- Task 1: ความคิดเห็นของพนักงานแต่ละข้อเป็นความจริงหรือไม่ ---
