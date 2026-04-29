@@ -2,7 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
- 
+import matplotlib.pyplot as plt
+import mplthai
+
+mplthai.setup()
+
 @st.cache_data
 def load_data():
     path = "2026 Data Test1 Final - Busy Buffet Dataset.xlsx"
