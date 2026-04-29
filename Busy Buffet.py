@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import mplthai
+import matplotlib.font_manager as fm
 
-# เรียกใช้ภาษาไทยทันที
-mplthai.setup()
+# สมมติว่าไฟล์ฟอนต์ชื่อ Kanit-Regular.ttf
+font_path = 'Kanit-Regular.ttf'
+fe = fm.FontEntry(fname=font_path, name='ThaiFont')
+fm.fontManager.ttflist.insert(0, fe)
+plt.rcParams['font.family'] = fe.name
+plt.rcParams['axes.unicode_minus'] = False
 
 @st.cache_data
 def load_data():
