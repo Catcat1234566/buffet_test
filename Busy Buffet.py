@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 import mplthai
 
+# เรียกใช้ภาษาไทยทันที
 mplthai.setup()
 
 @st.cache_data
 def load_data():
+    # ตรวจสอบชื่อไฟล์ให้ตรงกับบน GitHub
     path = "2026 Data Test1 Final - Busy Buffet Dataset.xlsx"
     xl = pd.read_excel(path, sheet_name=None)
     
@@ -27,19 +28,22 @@ def load_data():
     def to_min(t):
         if pd.isna(t): return 0
         parts = str(t).split(':')
-        return int(parts[0]) * 60 + int(parts[1])
- 
+        try:
+            return int(parts[0]) * 60 + int(parts[1])
+        except:
+            return 0
+
     data['meal_min'] = data['meal_end'].apply(to_min) - data['meal_start'].apply(to_min)
     data['is_walkaway'] = data['meal_start'].isna() & data['queue_start'].notna()
     
     return data, day_names
- 
+
 df, day_list = load_data()
 seated = df[df['meal_min'] > 0]
- 
+
 # --- ตั้งค่าหน้าจอ ---
 st.set_page_config(layout="wide")
-plt.rcParams['font.family'] = 'Tahoma' 
+
 st.title("Breakfast Buffet Analysis")
  
 # --- Task 1: ความคิดเห็นของพนักงานแต่ละข้อเป็นความจริงหรือไม่ ---
